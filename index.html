@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            position: relative;
+            height: 100vh;
+            margin: 0;
+            background-color: #f2f2f2;
+            font-family: Arial, sans-serif;
+        }
+
+        #chat-icon {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            cursor: pointer;
+            padding: 10px 20px;
+            background-color: #f6e830;
+            color: rgb(58, 53, 30);
+            font-weight: bold;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+
+        #chat-box {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            width: 430px;
+            height: 650px;
+            background-color: #b1c6d9;
+            border: 1px solid gray;
+            padding: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            flex-direction: column;
+            justify-content: space-between;
+            display: none;
+          }
+
+          #messages {
+              height: 80%;
+              overflow-y: auto;
+          }
+
+          .user, .bard {
+              margin: 10px 0;
+              clear: both;
+              position: relative;
+              display: flex;
+              align-items: flex-start;
+
+          }
+
+          .user {
+              float: right;
+              flex-direction: row-reverse;
+          }
+
+          .bard {
+              float: left;
+          }
+
+          .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+          }
+
+          .user .avatar {
+            float: right;
+          }
+
+          .bard .avatar {
+            float: left;
+          }
+
+          .message-bubble {
+            max-width: 70%;
+            background-color: #f0f0f2;
+            padding: 10px;
+            border-radius: 10px 10px 10px 0;
+            margin: 5px 50px;
+            position: relative;
+        }
+
+        .user .message-bubble {
+            background-color: #f6e830;
+            color: rgb(58, 53, 30);
+            float: right;
+            border-radius: 10px 10px 10px 10px;
+        }
+
+        .user .message-bubble::after {
+            content: "";
+            position: absolute;
+            top: 0; 
+            right: 0;
+            border-width: 10px 10px 0 0;
+            border-style: solid;
+            border-color: #f6e830 transparent;
+        }
+
+        .bard .message-bubble {
+            float: left;
+            border-radius: 10px 10px 10px 10px;
+        }
+
+        .bard .message-bubble::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            border-width: 10px 0 0 10px;
+            border-style: solid;
+            border-color: #f0f0f2 transparent;
+            }
+
+          #chat-form {
+              display: flex;
+              justify-content: space-between;
+              border-top: 1px solid #ccc;
+              padding: 10px;
+          }
+
+          #chat-form input[type="text"] {
+              width: 80%;
+              padding: 5px;
+              border: none;
+              border-radius: 10px;
+          }
+
+        #chat-form input[type="submit"] {
+            background-color: #f6e830;
+            color: rgb(58, 53, 30);
+            border: none;
+            border-radius: 10px;
+            padding: 5px 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="chat-icon" onclick="toggleChatBox()">
+        챗봇
+    </div>
+
+    <div id="chat-box">
+        <div id="messages"></div>
+        <form id="chat-form" onsubmit="event.preventDefault(); submitMessage()">
+            <input type="text" id="input-message" placeholder="질문을 입력하세요" autocomplete="off" required>
+            <input type="submit" value="입력">
+        </form>
+    </div>
+    <script>
+        var chatBoxVisible = false;
+
+        function toggleChatBox() {
+            var chatBox = document.getElementById("chat-box");
+            var inputMessage = document.getElementById("input-message");
+            if (!chatBoxVisible) {
+                chatBox.style.display = "flex";
+                chatBoxVisible = true;
+                inputMessage.focus(); 
+            } else {
+                chatBox.style.display = "none";
+                chatBoxVisible = false;
+                inputMessage.blur(); 
+            }
+        }
+
+        window.onload = function() {
+            document.getElementById("chat-box").style.display = "none";
+        }
+
+        function scrollToBottom(element) {
+            element.scrollTop = element.scrollHeight;
+        }
+
+        function submitMessage() {
+            var input = document.getElementById("input-message");
+            var message = input.value;
+            input.value = "";
+
+            var userMessage = document.createElement("div");
+            userMessage.className = "user";
+
+            var avatar = document.createElement("img");
+            avatar.src = "file:///C:/Users/tngus/OneDrive/바탕%20화면/챗위드포천교육/인공지능%20api%20활용/templates/images/im.png"; 
+            avatar.className = "avatar";
+            userMessage.appendChild(avatar);
+
+            var bubble = document.createElement("div");
+            bubble.textContent = message;
+            bubble.className = "message-bubble";
+            userMessage.appendChild(bubble);
+
+            var messages = document.getElementById("messages");
+            messages.appendChild(userMessage);
+
+            scrollToBottom(messages);
+
+            fetch("/", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ question: message })
+            }).then(response => response.json())
+            .then(data => {
+                var bardMessage = document.createElement("div");
+                bardMessage.className = "bard";
+
+                var bardAvatar = document.createElement("img");
+                bardAvatar.src = "im.png"; 
+                bardAvatar.className = "avatar";
+                bardMessage.appendChild(bardAvatar);
+
+                var bardBubble = document.createElement("div");
+                bardBubble.textContent = data.answer;
+                bardBubble.className = "message-bubble";
+                bardMessage.appendChild(bardBubble);
+
+                messages.appendChild(bardMessage);
+                scrollToBottom(messages);
+            });
+        }
+    </script>
+</body>
+</html>
