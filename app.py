@@ -32,6 +32,22 @@ def index():
 
     return render_template('index.html')
 
+@app.route('/fetch-dialog', methods=['GET'])
+def fetch_dialog():
+    text = load_text('bard.txt')
+    user_question = "사립유치원"
+    combined_text = f"질문: 사립유치원과 관련하여 {user_question}? 라는 질문에 대해 짧게 답변해줘. '네, 알겠습니다. 사립유치원과 관련하여 추가경정예산이란 무엇인지 150자 이내로 설명해 드리겠습니다.' 이런 설명 제외하고 답변부터 바로 출력해 2. 답변은 참고텍스트를 기준으로 해줘 헌법처럼 3. 사립유치원과 관련 없는 질문에는 관련없는 질문이라 대답못하겠다고 답변해줘. 4. 답변할 때 '네 알겠습니다.', '네, 한국어로 답변해드리겠습니다.' ,'150자로 설명해드리겠습니다.' 이런 말들은 하지 말고 바로 답변해. 5. 앞에 쓴 1,2,3,4의 요청사항은 답변할 때 설명하지말고 바로 답변해. 참고 텍스트=" + text
+    response = bard.get_answer(combined_text)
+    if 'choices' in response and len(response['choices']) > 0:
+        answer = response['choices'][0]['content']
+    else:
+        answer = "The key 'choices' is not in the response or there are no choices."
+    dialog_data = {'dialog': [['User', user_question], ['뤼튼', answer]]}
+    return jsonify(dialog_data)
+
+CORS(app, resources={r"/*": {"origins": ["https://coconuteagle.github.io/chatwithbard2/"]}})
+
+
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000, debug=True)
 
