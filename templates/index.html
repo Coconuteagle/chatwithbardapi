@@ -200,7 +200,7 @@
 
             scrollToBottom(messages);
 
-            fetch("/", {
+            fetch("http://35.196.47.85:5000/", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ question: message })
