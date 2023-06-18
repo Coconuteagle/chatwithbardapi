@@ -1,7 +1,10 @@
 from flask import Flask, render_template, request, jsonify
 import os
 import bardapi
+from flask_cors import CORS
 
+app = Flask(__name__)
+CORS(app)  # CORS 설정을 활성화합니다.
 # Bard API key 설정
 os.environ['_BARD_API_KEY'] = "XwgyrM8N1vkwESsSa5RQIK-bUDSJkbNfpT2GD25LaWTydkW8zCJ-WQPpoo9_sWf_6XBYEw."
 
